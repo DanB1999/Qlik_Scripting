@@ -1,0 +1,18 @@
+Kunden:
+
+LOAD
+    Fax,
+    Firma,
+    KontaktName,
+    KundenNr,
+    Land,
+    Länderkennz,
+    Ort,
+    PLZ,
+    RegionNr,
+    Straße,
+    Telefon
+FROM [lib://Qlik Schulung iodata/Kunden.qvd]
+(qvd);
+
+Trace Yes the qvd has to be in qlik to be called;
