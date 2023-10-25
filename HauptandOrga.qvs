@@ -1,0 +1,790 @@
+Trace Mapping teil wird jetzt geladen;
+
+Search Exclude *;
+
+
+[Mapping.AnonymeBereiche]:
+Mapping
+LOAD
+    STM.ORGA1.ebene03,
+    Bereiche
+FROM [lib://manuell (vnppbw1wt201_qsadmin)/Anonyme Bereiche.xlsx]
+(ooxml, embedded labels, table is Tabelle2);
+
+[Mapping.AnonymeFilialen]:
+
+Mapping
+LOAD
+    STM.ORGA1.ebene04,
+    Filialen
+FROM [lib://manuell (vnppbw1wt201_qsadmin)/Anonyme Bereiche.xlsx]
+(ooxml, embedded labels, table is Tabelle2);
+
+[Mapping.AnonymeBerater]:
+
+Mapping 
+LOAD
+    Beraternummer,
+    "Anonyme Namen"
+FROM [lib://manuell (vnppbw1wt201_qsadmin)/Anonyme Orgastruktur.xlsx]
+(ooxml, embedded labels, table is Tabelle1);
+
+
+[MaxStichtag]:
+
+LOAD s_Datum AS Max.Stichtag
+
+
+FROM [$(vpfadname)EHT_STM_HAUPTTABELLE.qvd]
+(qvd)
+WHERE s_Datum <'$(vToday)';
+
+// Kunde_Einheiten_Stammdaten vorher Kunde_Stammdaten
+
+let vMaxStichtag=Date(peek('Max.Stichtag'));
+let vMaxStichtagYYMM =Date(peek('Max.Stichtag'),'YYMM');
+let vMaxStichtagUS =Date(peek('Max.Stichtag'),'YYYY-MM-DD');
+
+let vMaxStichtagMonthEnd=MonthEnd(Date(peek('Max.Stichtag')));
+
+
+drop table MaxStichtag;
+
+
+
+
+
+
+[MaxStichtagHMV]:
+
+LOAD max(Stichtag) AS Max.Stichtag.HMV
+
+
+FROM [$(vpfadname)HHE_mit_Volumen_ohne_MA_Filter_Historie_Neu_mit_Dispo.qvd]
+(qvd);
+// WHERE Stichtag <'$(vToday)';
+
+// Kunde_Einheiten_Stammdaten vorher Kunde_Stammdaten
+
+let vMaxStichtagHMV=Date(peek('Max.Stichtag.HMV'));
+let vMaxStichtagYYMMHMV =Date(peek('Max.Stichtag.HMV'),'YYMM');
+let vMaxStichtagUSHMV =Date(peek('Max.Stichtag.HMV'),'YYYY-MM-DD');
+
+let vMaxStichtagMonthEndHMV=MonthEnd(Date(peek('Max.Stichtag.HMV')));
+
+
+drop table MaxStichtagHMV;
+
+
+
+
+
+
+[MaxStichtagTilgungen]:
+
+LOAD Max(Stichtag) AS Max.Stichtag.Tilgungen
+
+
+FROM [$(vpfadname)IND_Tilgungen.qvd]
+(qvd);
+
+// Kunde_Einheiten_Stammdaten vorher Kunde_Stammdaten
+
+let vMaxStichtagTilgungen=Date(peek('Max.Stichtag.Tilgungen'));
+let vMaxStichtagTilgungenYYMM =Date(peek('Max.Stichtag.Tilgungen'),'YYMM');
+let vMaxStichtagTilgungenUS =Date(peek('Max.Stichtag.Tilgungen'),'YYYY-MM-DD');
+
+drop table MaxStichtagTilgungen;
+
+
+
+
+
+
+[MaxStichtagKTO]:
+
+LOAD Max(Stichtag) AS Max.Stichtag.KTO
+
+
+FROM [$(vpfadname)KTO_Stammdaten.qvd]
+(qvd);
+
+// Kunde_Einheiten_Stammdaten vorher Kunde_Stammdaten
+
+let vMaxStichtagKTO=Date(peek('Max.Stichtag.KTO'));
+let vMaxStichtagKTO.YYMM =Date(peek('Max.Stichtag.KTO'),'YYMM');
+let vMaxStichtagKTO.US =Date(peek('Max.Stichtag.KTO'),'YYYY-MM-DD');
+
+let vMaxStichtagKTOMonthEnd=MonthEnd(Date(peek('Max.Stichtag.KTO')));
+
+
+drop table MaxStichtagKTO;
+
+
+
+// [MapEinheiten]:
+// Mapping Load
+
+//     AutoNumberhash256("Einheiten-Nr. Haushaltseinheit", year(Stichtag), month(Stichtag)),
+//     "Personennummer Ansprechpartner Haushaltseinheit"
+
+    
+// FROM [$(vpfadname)Kunde_Einheiten_Speziell.qvd]
+// (qvd)
+// where Stichtag >= addmonths('$(vMaxStichtag)',-'$(vzMonthBack)');
+
+
+
+// [MapEinheiten1]:
+// Mapping Load
+
+//     Autonumberhash256("Personennummer Ansprechpartner Haushaltseinheit", year(Stichtag), month(Stichtag)),
+//     "Einheiten-Nr. Haushaltseinheit"
+    
+// FROM [$(vpfadname)Kunde_Einheiten_Speziell.qvd]
+// (qvd)
+// where Stichtag >= addmonths('$(vMaxStichtag)',-'$(vzMonthBack)');
+
+
+
+// //10.05.2022 
+
+// //15.09.2022 ausgeblendet
+
+// [MapEinheitenHHE]:
+// Mapping Load
+
+//     Autonumberhash256(Personennummer, year(Stichtag), month(Stichtag)),
+//     "Einheiten-Nr. Haushaltseinheit"
+    
+// FROM [$(vpfadname)Kunde_Einheiten_Speziell.qvd]
+// (qvd)
+// where Stichtag >= addmonths('$(vMaxStichtag)',-'$(vzMonthBack)');
+
+
+//10.05.2022 
+
+
+// Emre*: Den Teil haben wir am 06. Feb 2023 in die IDA Abfrage integriert. Mapping wird nicht mehr benötigt.
+
+// [VTM.AVS.Produktbezeichnung]:
+
+// Mapping Load
+
+//      "Vertriebsaktendetail-Identifier" ,
+//      "Produktbezeichnung - Produkt-Nr."
+    
+// FROM [$(vpfadname)VTM_Anlass_Vertriebsakte_Stammdaten_Detail.qvd]
+// 	(qvd);
+//    where Stichtag >= addmonths('$(vMaxStichtag)',-'$(vzMonthBack)');
+
+
+
+
+// Emre*: Den Teil haben wir am 06. Feb 2023 in die IDA Abfrage integriert. Mapping wird nicht mehr benötigt.
+
+// [VTM.AVS.Produkt]:
+
+// Mapping Load
+
+//      "Vertriebsaktendetail-Identifier",
+//      Produkt 
+    
+// FROM [$(vpfadname)VTM_Anlass_Vertriebsakte_Stammdaten_Detail.qvd]
+// 	(qvd);
+//    where Stichtag >= addmonths('$(vMaxStichtag)',-'$(vzMonthBack)');
+   
+
+// Kontaktdaten status über kontakt anfragen 02.07.2022
+
+
+
+
+
+
+
+// Emre*: Den Teil haben wir am 06. Feb 2023 in die IDA Abfrage integriert. Mapping wird nicht mehr benötigt.
+
+// [VTM.AVS.Status]:
+
+// Mapping Load
+
+//      "Vertriebsaktendetail-Identifier",
+//        Status 
+    
+// FROM [$(vpfadname)VTM_Anlass_Vertriebsakte_Stammdaten_Detail.qvd]
+// 	(qvd);
+
+
+
+ // Kontaktdaten status über kontakt anfragen 02.07.2022
+ 
+ //kontakdaten mit Ort des Treffpunkt von Detail identifier table mapping to kontakt tabelle 
+ 
+
+
+
+
+// Emre*: Den Teil haben wir am 06. Feb 2023 in die IDA Abfrage integriert. Mapping wird nicht mehr benötigt.
+
+// [VTM.AVS.Ort.des.Treffpunkts]:
+
+// Mapping Load
+
+//  "Vertriebsaktendetail-Identifier",
+//  "Typ Ort des Treffpunkts"
+ 
+//  FROM [$(vpfadname)VTM_Anlass_Vertriebsakte_Stammdaten_Detail.qvd]
+// 	(qvd);
+ 
+ 
+ 
+//kontakdaten mit Ort des Treffpunkt von Detail identifier table mapping to kontakt tabelle  
+
+
+// //kontakdaten mit abgeschlossene stück anzahl  von Detail identifier table mapping to kontakt tabelle  
+// [VTM.AVS.Stück.Abgeschlossen]:
+
+// Mapping Load
+
+//  "Vertriebsaktendetail-Identifier",
+// "Stück - Abgeschlossen" 
+
+// FROM [$(vpfadname)VTM_Vertriebschance.qvd]
+// 	(qvd);
+ 
+//kontakdaten mit abgeschlossene stück anzahl  von Detail identifier table mapping to kontakt tabelle  
+
+
+
+
+
+[Map.Geno.User.ID.Berater]:
+
+mapping LOAD
+    
+    "Geno-User-ID",
+    STM.ORGA1.Kundenberater
+  
+FROM [lib://Processed_Data (vnppbw1wt201_qsadmin)/Orga.Struktur.V2.qvd]
+(qvd);
+
+
+
+
+
+[Map.KundeHTausVKN.BSH]:
+
+mapping LOAD
+    
+    "VKN BSH",
+    Personennummer
+ 
+FROM [lib://Processed_Data (vnppbw1wt201_qsadmin)/EHT_STM_HAUPTTABELLE.qvd]
+(qvd);
+
+
+
+
+[Map.KundeHTausVKN.BSH.AKT]:
+
+mapping LOAD
+    
+    "VKN BSH",
+    Personennummer
+ 
+FROM [lib://Processed_Data (vnppbw1wt201_qsadmin)/EHT_STM_HAUPTTABELLE.qvd]
+(qvd)
+where s_Datum = '$(vMaxStichtag)';
+
+
+//  FROM [lib://regular (vnppbw1wt201_qsadmin)/Orgastruktur.csv]
+//(txt, unicode, embedded labels, delimiter is '\t', msq);
+    
+// FROM [lib://manuell (vnppbw1wt201_qsadmin)/Orgastruktur/Vorlage_Orga.xlsx]
+// (ooxml, embedded labels, table is STM.ORGA1);
+
+
+
+
+[Map.KundeHTausVKN.Teambank]:
+
+mapping LOAD
+    
+    "VKN Teambank",
+    Personennummer
+ 
+FROM [lib://Processed_Data (vnppbw1wt201_qsadmin)/EHT_STM_HAUPTTABELLE.qvd]
+(qvd);
+
+
+[Map.KundeHTausVKN.Teambank.AKT]:
+
+mapping LOAD
+    
+    "VKN Teambank",
+    Personennummer
+ 
+FROM [lib://Processed_Data (vnppbw1wt201_qsadmin)/EHT_STM_HAUPTTABELLE.qvd]
+(qvd)
+where s_Datum = '$(vMaxStichtag)';
+
+
+
+
+
+
+[Map.KundeHTausVKN.RuV]:
+
+mapping LOAD
+    
+    "VKN R+V",
+    Personennummer
+ 
+FROM [lib://Processed_Data (vnppbw1wt201_qsadmin)/EHT_STM_HAUPTTABELLE.qvd]
+(qvd);
+
+
+
+
+[Map.KundeHTausVKN.RuV.AKT]:
+
+mapping LOAD
+    
+    "VKN R+V",
+    Personennummer
+ 
+FROM [lib://Processed_Data (vnppbw1wt201_qsadmin)/EHT_STM_HAUPTTABELLE.qvd]
+(qvd)
+where s_Datum = '$(vMaxStichtag)';
+
+
+
+
+
+
+[Map.KundeHTausVKN.SmartFinanz]:
+
+mapping LOAD
+    
+    "VKN Smart Finanz",
+    Personennummer
+ 
+FROM [lib://Processed_Data (vnppbw1wt201_qsadmin)/EHT_STM_HAUPTTABELLE.qvd]
+(qvd);
+
+
+
+
+[Map.KundeHTausVKN.SmartFinanz.AKT]:
+
+mapping LOAD
+    
+    "VKN Smart Finanz",
+    Personennummer
+ 
+FROM [lib://Processed_Data (vnppbw1wt201_qsadmin)/EHT_STM_HAUPTTABELLE.qvd]
+(qvd)
+where s_Datum = '$(vMaxStichtag)';
+
+
+
+
+
+
+[Map.KundeHTausVKN.DZ.HYP]:
+
+Mapping Load 
+
+    "VKN DZ Hyp",
+    Personennummer
+FROM [lib://Processed_Data (vnppbw1wt201_qsadmin)/EHT_STM_HAUPTTABELLE.qvd]
+(qvd);
+
+
+
+[Map.KundeHTausVKN.DZ.HYP.AKT]:
+
+Mapping Load 
+
+    "VKN DZ Hyp",
+	Personennummer
+FROM [lib://Processed_Data (vnppbw1wt201_qsadmin)/EHT_STM_HAUPTTABELLE.qvd]
+(qvd)
+where s_Datum = '$(vMaxStichtag)';
+
+
+
+
+[Map.KundeHTausVKN.MHB]:
+
+Mapping Load 
+
+    "VKN MHB",
+    Personennummer
+FROM [lib://Processed_Data (vnppbw1wt201_qsadmin)/EHT_STM_HAUPTTABELLE.qvd]
+(qvd);
+
+
+
+
+[Map.KundeHTausVKN.MHB.AKT]:
+
+Mapping Load 
+
+    "VKN MHB",
+    Personennummer
+FROM [lib://Processed_Data (vnppbw1wt201_qsadmin)/EHT_STM_HAUPTTABELLE.qvd]
+(qvd)
+where s_Datum = '$(vMaxStichtag)';
+
+
+
+
+
+
+
+
+
+
+[Map.Berater.Geno.User.ID]:
+
+Mapping LOAD
+
+    STM.ORGA1.Kundenberater,
+    "Geno-User-ID"
+FROM [lib://Processed_Data (vnppbw1wt201_qsadmin)/Orga.Struktur.V2.qvd]
+(qvd);
+
+  
+//  FROM [lib://regular (vnppbw1wt201_qsadmin)/Orgastruktur.csv]
+//(txt, unicode, embedded labels, delimiter is '\t', msq);
+
+// FROM [lib://manuell (vnppbw1wt201_qsadmin)/Orgastruktur/Vorlage_Orga.xlsx]
+// (ooxml, embedded labels, table is STM.ORGA1);
+
+
+
+// [MapKundeBerater]:
+
+// Mapping LOAD
+    
+//    Personennummer,
+//    Kundenberater
+    
+// FROM [$(vpfadname)Kunde_Stammdaten.qvd]
+// (qvd)
+// where Stichtag =  '$(vMaxStichtag)';
+
+
+
+
+// [MapKundeBerater]:
+
+// Mapping LOAD
+    
+//    Personennummer,
+//    Kundenberater
+    
+// FROM [$(vpfadname)EHT_STM_HAUPTTABELLE.qvd]
+// (qvd)
+// where s_Datum =  '$(vMaxStichtag)';
+
+
+
+
+
+
+// [MapKundeBeraterHist]:
+
+// Mapping LOAD
+    
+//     AutoNumberHash256(Personennummer,year(Stichtag), month(Stichtag)),
+//     Kundenberater
+    
+// FROM [$(vpfadname)Kunde_Stammdaten.qvd]
+// (qvd)
+// where Stichtag >= addmonths('$(vMaxStichtag)',-'$(vzMonthBack)')
+// ;
+
+
+////////////	Emre Mapping am 09. Februar 2023  -    START		////////////////////////////
+
+
+// [MapEasyCreditMitBerater]:	// Wenn ich nur einen Monat in der Orgastruktur habe (OHNE Historie)
+// Mapping Load
+
+//      easyCredit_Beraternummer22,
+//      STM.ORGA1.Kundenberater
+    
+// FROM [lib://Processed_Data (vnppbw1wt201_qsadmin)/Orga.Struktur.V2.qvd]
+// (qvd);
+// //where  s_Datum >= addmonths('$(vMaxStichtag)',-'$(vzMonthBack)');
+
+
+
+
+
+// [MapRuVAgenturNrMitBeraterNr]:	// Wenn ich nur einen Monat in der Orgastruktur habe (OHNE Historie)
+// Mapping Load
+
+//      "R+V.Agenturnummer",
+//      STM.ORGA1.Kundenberater
+    
+// FROM [lib://Processed_Data (vnppbw1wt201_qsadmin)/Orga.Struktur.V2.qvd]
+// (qvd);
+// //where  s_Datum >= addmonths('$(vMaxStichtag)',-'$(vzMonthBack)');
+
+
+
+
+
+// [MapUnionBeraterNrMitOrgaKundenberaterNr]: // Wenn ich nur einen Monat in der Orgastruktur habe (OHNE Historie)
+// Mapping
+// LOAD
+//     "Union-Investment_Beraternummer",
+//     STM.ORGA1.Kundenberater
+// FROM [lib://Processed_Data (vnppbw1wt201_qsadmin)/Orga.Struktur.V2.qvd]
+// (qvd);
+
+
+
+
+////////////	Emre Mapping am 09. Februar 2023  -    ENDE		////////////////////////////
+
+
+
+//Daniel 13.10.2022
+
+// [MapKundeDepot]:
+
+// Mapping LOAD
+
+// 	AutoNumberHash256(Personennummer,year(Stichtag), month(Stichtag)),
+//     "Depot-Nr."
+    
+// FROM [lib://Processed_Data (vnppbw1wt201_qsadmin)/Depot.Kontodaten.qvd]
+// (qvd);
+
+
+
+
+// [MapKundeDepotYEAR]:
+
+// Mapping LOAD
+
+// 	AutoNumberHash256(Personennummer,year(Stichtag)),
+//     "Depot-Nr."
+    
+// FROM [lib://Processed_Data (vnppbw1wt201_qsadmin)/Depot.Kontodaten.qvd]
+// (qvd);
+
+
+
+//0509.2022
+
+// [MAP.PRZ.VVL.Vorgang.Thema]:
+
+// Mapping Load
+
+//     PRZ.VVL.Vorlagen.Nummer,
+//     PRZ.VVL.Thema.Beratung
+    
+// FROM [lib://manuell (vnppbw1wt201_qsadmin)/Orgastruktur/Vorlage_Orga.xlsx]
+// (ooxml, embedded labels, table is Beratungsthema);
+
+
+
+
+
+
+
+// [MAP.PRZ.VVL.Vorgang.Typ]:
+
+// Mapping Load
+
+// 	PRZ.VVL.Vorlagen.Nummer,
+//     PRZ.VVL.Typ
+    
+// FROM [lib://manuell (vnppbw1wt201_qsadmin)/Orgastruktur/Vorlage_Orga.xlsx]
+// (ooxml, embedded labels, table is Beratungsthema);
+
+
+    
+// [Map.VTM.VAS.Personennummer]:
+
+// Mapping Load
+// 	 "Vertriebsakte-Identifier" as ID,
+//      Personennummer as Wert
+    
+
+// FROM [$(vpfadname)VTM_Anlass_Vertriebsakte_Stammdaten.qvd]
+// (qvd)
+// where Anlassdatum >= addmonths('$(vMaxStichtag)',-'$(vzMonthBack)');
+
+
+/*
+[MAP.BUV.BBF.Bedarfsfeld]:
+
+Mapping LOAD
+
+BUV.BBF.Bedarfsfeld,
+BUV.BBF.Bedarfsfeld.Bezeichnung
+
+FROM [lib://manuell (vnppbw1wt201_qsadmin)/Orgastruktur/Vorlage_Orga.xlsx]
+(ooxml, embedded labels, table is Bedarfsfeld);
+*/
+
+
+[MAP.KTO.VRC.Konto.Produkt]:
+
+Mapping Load
+	AutoNumberHash256(Kontonummer,year(Stichtag), month(Stichtag)),
+    Produkt    
+FROM [$(vpfadname)KTO_Stammdaten.qvd]
+(qvd);
+
+
+
+Trace Haupttabelle wird jetzt geladen;
+[Haupttabelle]:
+sample 0.7
+LOAD
+
+	
+   AutoNumberHash256(Kundenberater,year(Date(s_Datum,'DD.MM.YYYY')), month(Date(s_Datum,'DD.MM.YYYY'))) as ANH#Berater#Orga.Join,			// Primary Key für die Orgastruktur mit der Haupttabelle
+   
+   AutoNumberHash256(Kundenberater,year(Date(s_Datum,'DD.MM.YYYY')), month(Date(s_Datum,'DD.MM.YYYY'))) as ANH#Kundenberater#Join,
+   AutoNumberHash256(Personennummer,year(Date(s_Datum,'DD.MM.YYYY')), month(Date(s_Datum,'DD.MM.YYYY'))) as ANH#Personennummer#Join,
+   
+   
+//	AutoNumberHash256("Geno-User-ID", year(Stichtag), month(Stichtag)) as EHT.STM.HES.Orga.KBR.PK,        // Primary Key für die Orgastruktur mit der Haupttabelle. Über Autonumberhash verknüpft aufgrund von Beraterwechseln
+
+
+//****************************************Digitalisierung  Start ***************************************************************//
+    AutoNumberHash256(Personennummer) as ##EHT.STM.HES#PitCon,
+//****************************************Digitalisierung  Ende ***************************************************************//
+	
+
+//****************************************Manuelle Dateien  Start ***************************************************************//
+	"Einheiten-Nr. Haushaltseinheit" as ##EHT.STM.HES#DZ.EG,
+//     AutoNumberHash256(Applymap('MapKundeDepot',AutoNumberHash256(Personennummer,year(s_Datum), month(s_Datum)),'-9999999999'),year(Date(s_Datum,'DD.MM.YYYY')), month(Date(s_Datum,'DD.MM.YYYY'))) as ##EHT.STM.HES#IND.MDD.B,
+    AutoNumberHash256(num(Kundenberater)) as ##STM.ORGA1#DZC.IST.Jahrend,    
+//****************************************Manuelle Dateien  Ende ***************************************************************//
+
+
+//****************************************Verbundpartnerkundennummer Start ***************************************************************//
+	AutoNumberHash256("VKN Teambank",year(Date(s_Datum,'DD.MM.YYYY')), month(Date(s_Datum,'DD.MM.YYYY'))) as ANH##VKN.Teambank#Join,   
+    AutoNumberHash256(num("VKN Smart Finanz"),year(Date(s_Datum,'DD.MM.YYYY')), month(Date(s_Datum,'DD.MM.YYYY'))) as ANH##VKN.SmartFinanz#Join,
+    AutoNumberHash256(num("VKN R+V"),year(Date(s_Datum,'DD.MM.YYYY')), month(Date(s_Datum,'DD.MM.YYYY'))) as ANH##VKN.RuV#Join,   
+    AutoNumberHash256("VKN BSH",year(Date(s_Datum,'DD.MM.YYYY')), month(Date(s_Datum,'DD.MM.YYYY'))) as ANH##VKN.BSH#Join,
+//****************************************Verbundpartnerkundennummer Ende ***************************************************************//
+
+	Date(s_Datum,'DD.MM.YYYY')  as EHT.STM.Stichtag,
+    MonthEnd(Date(s_Datum,'DD.MM.YYYY'))  as EHT.STM.Stichtag.Monthend,
+    Date(s_Datum,'YYMM') as EHT.STM.Stichtag.YYMM,
+    "Einheiten-Nr. Haushaltseinheit" as EHT.STM.Einheiten.Nr.Haushaltseinheit,
+    AutoNumberHash256(Personennummer) as EHT.STM.Personennummer,
+	AutoNumberHash256(Kundenberater) as EHT.STM.Kundenberater,
+//    "Geno-User-ID" as EHT.STM.Geno.User.ID,
+    AutoNumberHash256(Kundenbearbeiter) as EHT.STM.Kundenbearbeiter,
+    "Mitarbeiter-Kennzeichen" as EHT.STM.Mitarbeiter.Kennzeichen,
+    "Alter des Kunden" as EHT.STM.Alter.des.Kunden,
+    If(Kundensegment = 101 ,'PB-Kunde',
+ IF(Kundensegment = 102, 'A-Kunde',
+ IF(Kundensegment = 103, 'B-Kunde',
+ IF(Kundensegment = 104, 'C-Kunde', ' ' 
+ )))) as EHT.STM.Kundensegment,
+    Personenart as EHT.STM.Personenart,
+    "Person angelegt am" as EHT.STM.Person.angelegt.am,
+    Rechtsform as EHT.STM.Rechtsform,
+    Rechtsformausprägung as EHT.STM.Rechtsformausprägung,
+    Sterbedatum as EHT.STM.Sterbedatum,
+    Risikobereitschaft as EHT.STM.Risikobereitschaft,
+    "Elektronische Post / Online-Banking" as EHT.STM.Elektronische.Post.Online.Banking,
+    "Gesamtscore (Person)" as EHT.STM.Gesamtscore.Person,
+   
+    "Score (HHE)" as EHT.STM.Score.HHE,
+       "VKN Teambank"as EHT.STM.VKN.Teambank ,
+       "VKN Union"  as EHT.STM.VKN.Union ,
+       "VKN Smart Finanz"  as EHT.STM.VKN.Smart.Finanz,
+       "VKN R+V"  as EHT.STM.VKN.RuV,
+       "VKN BSH"  as EHT.STM.VKN.BSH ,
+//     Banknummer as EHT.STM.Banknummer,
+//     "Einheiten-Nr. identische Person" as EHT.STM.Einheiten.Nr.identische.Person,
+//     "Einheiten-Nr. Risikoeinheit" as EHT.STM.Einheiten.Nr.Risikoeinheit,
+    AutoNumberHash256("Personennummer Ansprechpartner Haushaltseinheit") as EHT.STM.Personennummer.Ansprechpartner.Haushaltseinheit
+//     "Personennummer Ansprechpartner identische Person" as EHT.STM.Personennummer.Ansprechpartner.identische.Person,
+//     "Personennummer Ansprechpartner Risikoeinheit" as EHT.STM.Personennummer.Ansprechpartner.Risikoeinheit
+
+    
+//     erträge DaSHBOARD  Relevant 																//17.04.2023 neue Haupt tabelle 
+//     "VKN Allianz"  as EHT.STM.VKN.Allianz ,
+//     "VKN BSH"  as EHT.STM.VKN.BSH ,
+//     "VKN R+V allgemein"  as EHT.STM.VKN.RuV.allgemein ,
+//     "VKN R+V Leben"  as EHT.STM.VKN.RuV.Leben ,
+//     "VKN R+V Darlehen" as EHT.STM.VKN.RuV.Darlehen ,
+//     "VKN Union"  as EHT.STM.VKN.Union ,
+//     "VKN DZ Privatbank" as EHT.STM.VKN.DZ.Privatbank ,
+//     "VKN Smart Finanz"  as EHT.STM.VKN.Smart.Finanz 
+//     "VKN DZ Hyp" as EHT.STM.VKN.DZ.Hyp ,
+//     "VKN MHB" as EHT.STM.VKN.MHB ,
+//     "VKN Teambank" as EHT.STM.VKN.Teambank ,
+//     "VKN DZ Privatbank (LU)" as EHT.STM.VKN.DZ.Privatbank.LU 
+
+//erträge   DaSHBOARD Relevant 
+//17.04.2023 neue Haupt tabelle 
+    
+FROM [lib://Processed_Data (vnppbw1wt201_qsadmin)/EHT_STM_HAUPTTABELLE.qvd]
+(qvd);
+
+
+
+Left Join([Haupttabelle])
+
+LOAD
+
+	
+    AutoNumberHash256(easyCredit_Beraternummer22,year(Date(s_Datum,'DD.MM.YYYY')), month(Date(s_Datum,'DD.MM.YYYY'))) as ##STM.ORGA1#IND.AFS,
+
+	s_Datum as STM.ORGA1.Stichtag,
+    AutoNumberHash256(STM.ORGA1.Kundenberater) as STM.ORGA1.Kundenberater,
+    AutoNumberHash256(STM.ORGA1.Kundenberater) as %KeyKundenberater,  //Ziel 
+//     STM.ORGA1.Kundenberater as STM.ORGA1.KUNDENBERATER,  			// Nur für Section Access
+    "Geno-User-ID" as STM.ORGA1.Geno.User.ID,
+//    Stichtag as STM.ORGA1.Stichtag,
+    AutoNumberHash256(Bedienernummer) as STM.ORGA1.Bedienernummer,
+    "R+V.Agenturnummer" as STM.ORGA1.RuV.Agenturnummer,
+    BSH_Berater_Nummer as STM.ORGA1.BSH.Berater.Nummer,
+    "Union-Investment_Beraternummer" as STM.ORGA1.Union.Investment.Beraternummer,
+    easyCredit_Beraternummer22 as STM.ORGA1.easyCredit.Beraternummer,
+//  STM.ORGA1.Kundenberater as EHT.STM.HES.Orga.KBR.PK, ////orgastruktur       24.05.2022
+    AutoNumberHash256(STM.ORGA1.Kundenberater,year(Date(s_Datum,'DD.MM.YYYY')), month(Date(s_Datum,'DD.MM.YYYY'))) as ANH#Berater#Orga.Join, // Orgastruktur
+//     AutoNumberHash256("Geno-User-ID",year(Date(s_Datum,'DD.MM.YYYY')), month(Date(s_Datum,'DD.MM.YYYY'))) as ##STM.ORGA1#IND.SMF.BUP,   // SF 
+    AutoNumberHash256("Geno-User-ID",year(Date(s_Datum,'DD.MM.YYYY')), month(Date(s_Datum,'DD.MM.YYYY'))) as ANH#GenoUserID#Orga,
+    
+//     AutoNumberHash256(STM.ORGA1.Kundenberater,year(Date(s_Datum,'DD.MM.YYYY')), month(Date(s_Datum,'DD.MM.YYYY'))) as ##EHT.STM.HES#BSH.EAB,
+//     AutoNumberHash256(STM.ORGA1.Kundenberater,year(Date(s_Datum,'DD.MM.YYYY')), month(Date(s_Datum,'DD.MM.YYYY'))) as ##EHT.STM.HES#BSH.NGB,
+    
+    
+//     STM.ORGA1.Vorname,
+//     STM.ORGA1.Nachname,
+   applymap('Mapping.AnonymeBerater',STM.ORGA1.Kundenberater,'Sonstige') as STM.ORGA1.Beratername,
+    [STM.ORGA1.Kundenberater]&' - '&applymap('Mapping.AnonymeBerater',STM.ORGA1.Kundenberater,'Sonstige') as STM.ORGA1.Beraternummer.mit.Beratername,
+ 	STM.ORGA1.ebene01,
+    UPPER(STM.ORGA1.ebene01) as STM.ORGA1.EBENE01,	// nur für Section Access
+    STM.ORGA1.ebene02,
+    UPPER(STM.ORGA1.ebene02) as STM.ORGA1.EBENE02,	// nur für Section Access
+    //STM.ORGA1.ebene03,
+    Applymap('Mapping.AnonymeBereiche',STM.ORGA1.ebene03, 'Sonstige') as   STM.ORGA1.ebene03,
+    UPPER(Applymap('Mapping.AnonymeBereiche',STM.ORGA1.ebene03, 'Sonstige')) as   STM.ORGA1.EBENE03,// nur für Section Access
+    //UPPER(STM.ORGA1.ebene03) as STM.ORGA1.EBENE03,	// nur für Section Access
+    
+    //STM.ORGA1.ebene04,
+    Applymap('Mapping.AnonymeFilialen',STM.ORGA1.ebene04, 'Sonstige') as   STM.ORGA1.ebene04,
+    //UPPER(STM.ORGA1.ebene04) as STM.ORGA1.EBENE04,	// nur für Section Access
+    UPPER(Applymap('Mapping.AnonymeFilialen',STM.ORGA1.ebene04, 'Sonstige')) as   STM.ORGA1.EBENE04// nur für Section Access
+//     Berechtigungsgruppe
+
+FROM [lib://Processed_Data (vnppbw1wt201_qsadmin)/Orga.Struktur.V2.qvd]			// Ab 13. März 2023 benutzt
+(qvd);
