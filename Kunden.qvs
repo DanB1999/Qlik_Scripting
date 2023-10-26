@@ -17,3 +17,5 @@ FROM [lib://Qlik Schulung iodata/Kunden.qvd]
 
 Trace Yes the qvd has to be in qlik to be called;
 Trace Directly connected GitHub;
+Trace Now it is directly von VS Code;
+
