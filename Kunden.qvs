@@ -6,7 +6,7 @@ LOAD
     KontaktName,
     KundenNr,
     Land,
-    Länderkennz,
+   Länderkennz,
     Ort,
     PLZ,
     RegionNr,
