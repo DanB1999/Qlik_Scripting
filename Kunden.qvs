@@ -6,11 +6,11 @@ LOAD
     KontaktName,
     KundenNr,
     Land,
-   // Laenderkennz,
+    Länderkennz,
     Ort,
     PLZ,
     RegionNr,
-    //Strasse,
+    Straße,
     Telefon
 FROM [lib://Qlik Schulung iodata/Kunden.qvd]
 (qvd);
